@@ -1,7 +1,4 @@
 `timescale 1ns/ 1ps
-//`include "mips.sv"
-//`include "instr_mem.sv"
-//`include "IO/DataMemoryDecoder.sv"
 module cpu (
     input   logic   clk, rst,
     input   logic   buttonL,
@@ -10,6 +7,11 @@ module cpu (
     output  logic   [7:0]AN,
     output  logic   DP,
     output  logic   [6:0]A2G
+    
+    // output   logic   [31:0]data_addr,
+    // output   logic   [31:0]mem_write_data,
+    // output   logic   mem_we
+
 );
     logic [31:0]pc, instr, read_data;
     logic   mem_we;

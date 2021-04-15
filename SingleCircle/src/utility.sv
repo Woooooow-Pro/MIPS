@@ -5,7 +5,7 @@ module sign_extension #(
     input   logic   [Width-1:0]in,
     output  logic   [31:0]out
 );
-    assign out = {{(31-Width){in[Width-1]}}, in};
+    assign out = {{(32-Width){in[Width-1]}}, in};
 endmodule
 
 // 2:1 mux
@@ -44,15 +44,15 @@ endmodule
 
 // 1:2 sel
 
-module sel2 (
-    input   logic   in,
-    input   logic   selector,
-    output  logic   out0,
-    output  logic   out1
-);
-    assign out0 = selector == 0? in: 0;
-    assign out1 = selector == 1? in: 0;
-endmodule
+// module sel2 (
+//     input   logic   in,
+//     input   logic   selector,
+//     output  logic   out0,
+//     output  logic   out1
+// );
+//     assign out0 = selector == 0? in: 0;
+//     assign out1 = selector == 1? in: 0;
+// endmodule
 
 // left shift 2
 module lshift2 (

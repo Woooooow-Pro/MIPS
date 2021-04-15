@@ -1,6 +1,3 @@
-//`include "alu.sv"
-//`include "register_file.sv"
-//`include "utility.sv"
 module datapath (
     input   logic   clk, rst,
     input   logic   pc_src,

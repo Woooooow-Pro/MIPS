@@ -55,11 +55,11 @@ module main_decoder (
         case(operation)
             6'b00_0000: begin
                 case (func)
-                    6'b00_0000: controls = 12'b0000_1100_0011; // sll
-                    6'b00_0010: controls = 12'b0000_1100_0100; // srl
-                    6'b00_0011: controls = 12'b0000_1100_0101; // sra
-                    6'b00_1000: controls = 12'b0000_1100_0101;
-                    default:    controls = 12'bXX10_0XXX_0XXX;
+                    6'b00_0000: controls = 12'b0000_1001_0011; // sll
+                    6'b00_0010: controls = 12'b0000_1001_0100; // srl
+                    6'b00_0011: controls = 12'b0000_1001_0101; // sra
+                    6'b00_1000: controls = 12'bXX10_0XXX_0XXX; // jr
+                    default:    controls = 12'b0000_1100_0111;
                 endcase
             end
             6'b10_0011: controls = 12'b0000_1011_0000; // lw
