@@ -1,6 +1,6 @@
 module instr_mem #(
-    parameter Width = 6;
-    parameter Size = 64;
+    parameter Width = 6,
+    parameter Size = 64
 )(
     input   logic   [Width - 1:0]   pc_addr,
     output  logic   [31:0]          instr

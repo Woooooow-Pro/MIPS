@@ -1,5 +1,5 @@
 module data_mem #(
-    parameter Size = 64;
+    parameter Size = 64
 )(
     input   logic   clk, we,
     input   logic   [31:0]data_addr,
@@ -10,8 +10,8 @@ module data_mem #(
 
     always_ff @(posedge clk) begin
         if(we)
-            RAM[data_addr[31:2]] <= wd;
+            RAM[data_addr[31:2]] <= write_data;
     end
 
-    assign read_data = RAMRAM[data_addr[31:2]];
+    assign read_data = RAM[data_addr[31:2]];
 endmodule

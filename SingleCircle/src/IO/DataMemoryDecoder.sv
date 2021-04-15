@@ -1,5 +1,5 @@
-`include "./utility.sv"
-`include "./data_mem.sv"
+`include "utility.sv"
+`include "data_mem.sv"
 `include "IOport.sv"
 `include "mux7seg.sv"
 module DataMemoryDecoder (
