@@ -27,10 +27,10 @@ module control_unit (
         .alu_op(alu_op)
     );
 
-    alu_decoder(
+    alu_decoder alu_decoder(
         .func(func),
         .alu_op(alu_op),
-        .alu_controller(alu_controller)
+        .alu_control(alu_controller)
     );
     assign pc_src = (branch[1] & zero) | (branch[0] & !zero);
 endmodule
@@ -48,7 +48,7 @@ module main_decoder (
     output  logic   mem_we,
     output  logic   [2:0]alu_op
 );
-    logic [11:0)]controls;
+    logic [11:0]controls;
     assign {branch, jump, reg_we, reg_write_addr,
         reg_write_data, alu_src, mem_we, alu_op} = controls;
     always_comb begin
@@ -79,7 +79,7 @@ endmodule
 module alu_decoder (
     input   logic   [5:0]func,
     input   logic   [2:0]alu_op,
-    output  logic   [3:0]alu_control
+    output  logic   [2:0]alu_control
 );
     always_comb begin
         case(alu_op)

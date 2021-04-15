@@ -1,7 +1,7 @@
-`include "utility.sv"
-`include "data_mem.sv"
-`include "IOport.sv"
-`include "mux7seg.sv"
+//`include "utility.sv"
+//`include "data_mem.sv"
+//`include "IO/IOport.sv"
+//`include "IO/mux7seg.sv"
 module DataMemoryDecoder (
     input   logic   clk,
     input   logic   write_EN,
@@ -22,12 +22,14 @@ module DataMemoryDecoder (
     logic [11:0]led;
 
     // select write engine
-    sel2 selWE(
-        .in(write_EN),
-        .selector(data_addr[7]),
-        .out0(mem_we),
-        .out1(pWrite)
-    );
+//    sel2 selWE(
+//        .in(write_EN),
+//        .selector(data_addr[7]),
+//        .out0(mem_we),
+//        .out1(pWrite)
+//    );
+    assign mem_we = write_EN & (data_addr[7] == 1'b0);
+    assign pWrite = (data_addr[7] == 1'b1)? write_EN: 0;
 
     data_mem data_mem(
         .clk(clk),

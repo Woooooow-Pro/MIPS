@@ -1,6 +1,7 @@
-`include "mips.sv"
-`include "instr_mem.sv"
-`include "IO/DataMemoryDecoder.sv"
+`timescale 1ns/ 1ps
+//`include "mips.sv"
+//`include "instr_mem.sv"
+//`include "IO/DataMemoryDecoder.sv"
 module cpu (
     input   logic   clk, rst,
     input   logic   buttonL,
@@ -22,7 +23,8 @@ module cpu (
         .read_data(read_data),
         .mem_we(mem_we),
         .pc(pc),
-        .alu_result(data_addr)
+        .alu_result(data_addr),
+        .mem_write_data(mem_write_data)
     );
 
     DataMemoryDecoder DataMemoryDecoder(
@@ -40,13 +42,13 @@ module cpu (
         .A2G(A2G)
     );
 
-    data_mem data_mem(
-        .clk(clk),
-        .we(mem_we),
-        .data_addr(data_addr),
-        .write_data(mem_write_data),
-        .read_data(read_data)
-    );
+//    data_mem data_mem(
+//        .clk(clk),
+//        .we(mem_we),
+//        .data_addr(data_addr),
+//        .write_data(mem_write_data),
+//        .read_data(read_data)
+//    );
 
     instr_mem instr_mem(
         .pc_addr(pc[7:2]),

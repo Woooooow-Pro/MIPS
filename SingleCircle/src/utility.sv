@@ -1,6 +1,6 @@
 // signal extension
 module sign_extension #(
-    parameter Width = 16;
+    parameter Width = 16
 )(
     input   logic   [Width-1:0]in,
     output  logic   [31:0]out
@@ -10,7 +10,7 @@ endmodule
 
 // 2:1 mux
 module mux2 #(
-    parameter Width = 32;
+    parameter Width = 32
 )(
     input   logic   selector,
     input   logic   [Width - 1:0]s0,
@@ -22,7 +22,7 @@ endmodule
 
 // 4:1 mux
 module mux4 #(
-    parameter Width = 32;
+    parameter Width = 32
 )(
     input   logic   [1:0]selector,
     input   logic   [Width - 1:0]s0,
@@ -57,7 +57,7 @@ endmodule
 // left shift 2
 module lshift2 (
     input   logic   [31:0]in,
-    output  logic   [31:0]out,
+    output  logic   [31:0]out
 );
     assign out = {in[29:0], 2'b00};
 endmodule
@@ -66,14 +66,14 @@ endmodule
 module adder (
     input   logic   [31:0] a,
     input   logic   [31:0] b,
-    output  logic   [31:0] result,
+    output  logic   [31:0] result
 );
     assign result = a + b;
 endmodule
 
 // flip flop
 module flip_flop (
-    input   logic   clk, rst
+    input   logic   clk, rst,
     input   logic   [31:0]in,
     output  logic   [31:0]out
 );

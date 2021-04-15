@@ -1,5 +1,5 @@
 module data_mem #(
-    parameter Size = 64
+    parameter Size = 256
 )(
     input   logic   clk, we,
     input   logic   [31:0]data_addr,

@@ -20,7 +20,7 @@ module IOport (
         if(rst) begin
             reg_status  <= 2'b00;
             reg_switch  <= 16'h00;
-            reg_led     <= 12'h00;
+            reg_led     <= 12'b0000_0000_0000;
         end
         else begin
             // input new data
@@ -33,6 +33,7 @@ module IOport (
             if(buttonL) begin
                 reg_status[0] <= 1;
                 led <= reg_led;
+//                led <= 12'b1111_1111_1111;
             end
 
             // read output data

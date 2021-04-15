@@ -1,6 +1,6 @@
-`include "alu.sv"
-`inlcude "register_file.sv"
-`include "utility.sv"
+//`include "alu.sv"
+//`include "register_file.sv"
+//`include "utility.sv"
 module datapath (
     input   logic   clk, rst,
     input   logic   pc_src,
@@ -99,6 +99,6 @@ module datapath (
         .b_i(src_b),
         .alu_control_i(alu_controller),
         .result_o(alu_result),
-        .zero(zero),
+        .zero(zero)
     );
 endmodule

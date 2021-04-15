@@ -1,5 +1,5 @@
-`include "control_unit.sv"
-`include "datapath.sv"
+//`include "control_unit.sv"
+//`include "datapath.sv"
 module mips (
     input   logic   clk, rst,
     input   logic   [31:0]instr,
