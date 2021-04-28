@@ -14,7 +14,7 @@ module alu #(parameter Width = 32)(
             3'b100:   result_o = a_i >> b_i;    // 4: srl
             3'b101:   result_o = a_i >>> b_i;   // 5: sra
             3'b110:   result_o = a_i - b_i;     // 6: sub
-            3'b111:   result_o = a_i < b_i;     // 7: slr
+            3'b111:   result_o = a_i < b_i;     // 7: slt
         default: result_o = 3'd0;
         endcase
     end

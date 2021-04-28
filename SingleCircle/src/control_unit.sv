@@ -55,9 +55,9 @@ module main_decoder (
         case(operation)
             6'b00_0000: begin
                 case (func)
-                    6'b00_0000: controls = 12'b0000_1001_0011; // sll
-                    6'b00_0010: controls = 12'b0000_1001_0100; // srl
-                    6'b00_0011: controls = 12'b0000_1001_0101; // sra
+                    6'b00_0000: controls = 12'b0000_1001_0100; // sll
+                    6'b00_0010: controls = 12'b0000_1001_0101; // srl
+                    6'b00_0011: controls = 12'b0000_1001_0110; // sra
                     6'b00_1000: controls = 12'bXX10_0XXX_0XXX; // jr
                     default:    controls = 12'b0000_1100_0111;
                 endcase
@@ -68,7 +68,7 @@ module main_decoder (
             6'b00_0101: controls = 12'b0100_0XX0_0001; // bnq
             6'b00_1000: controls = 12'b0000_1001_0000; // addi
             6'b00_1100: controls = 12'b0000_1001_0010; // andi
-            6'b00_1101: controls = 12'b0000_1001_0001; // ori
+            6'b00_1101: controls = 12'b0000_1001_0011; // ori
             6'b00_0010: controls = 12'bXX01_0XXX_0XXX; // j
             default:    controls = 12'bXXXX_XXXX_XXXX; // illegal op
         endcase
