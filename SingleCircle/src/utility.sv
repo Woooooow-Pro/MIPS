@@ -8,6 +8,16 @@ module sign_extension #(
     assign out = {{(32-Width){in[Width-1]}}, in};
 endmodule
 
+// unsignal extension
+module unsign_extension #(
+    parameter Width = 5
+)(
+    input   logic   [Width-1:0]in,
+    output  logic   [31:0]out
+);
+    assign out = {{(32-Width){1'b0}}, in};
+endmodule
+
 // 2:1 mux
 module mux2 #(
     parameter Width = 32

@@ -10,7 +10,7 @@ module mips (
     output  logic   [31:0]mem_write_data
 );
     logic zero, pc_src, reg_write_addr, 
-        reg_write_data, alu_src, reg_we;
+        reg_write_data, alu_src_a, alu_src_b, reg_we;
     logic [1:0]jump;
     logic [2:0]alu_controller;
 
@@ -23,7 +23,8 @@ module mips (
         .reg_we(reg_we),
         .reg_write_addr(reg_write_addr),
         .reg_write_data(reg_write_data),
-        .alu_src(alu_src),
+        .alu_src_a(alu_src_a),
+        .alu_src_b(alu_src_b),
         .alu_controller(alu_controller),
         .mem_we(mem_we)
     );
@@ -34,7 +35,8 @@ module mips (
         .reg_write_data(reg_write_data),
         .reg_write_addr(reg_write_addr),
         .reg_we(reg_we),
-        .alu_src(alu_src),
+        .alu_src_a(alu_src_a),
+        .alu_src_b(alu_src_b),
         .jump(jump),
         .alu_controller(alu_controller),
         .instr(instr),

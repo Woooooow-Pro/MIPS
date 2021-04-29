@@ -4,7 +4,8 @@ module datapath (
     input   logic   reg_write_data,
     input   logic   reg_write_addr,
     input   logic   reg_we,
-    input   logic   alu_src,
+    input   logic   alu_src_a,
+    input   logic   alu_src_b,
     input   logic   [1:0]jump,
     input   logic   [2:0]alu_controller,
     input   logic   [31:0]instr,
@@ -17,8 +18,8 @@ module datapath (
     logic [31:0] pc_next, pc_branch_next, pc_plus_4, pc_branch;
     logic [4:0]  write_reg;
     logic [31:0] write_reg_data;
-    logic [31:0] sign_imm, sign_imm_ls;
-    logic [31:0] src_a, src_b;
+    logic [31:0] sign_imm, sign_imm_ls, shift_imm;
+    logic [31:0] src_a, src_b, src_a_temp, src_b_temp;
 
     // next pc logic
     flip_flop pc_reg(
@@ -68,7 +69,7 @@ module datapath (
         .r_addr_2(instr[20:16]),
         .w_addr(write_reg),
         .write_data(write_reg_data),
-        .rd_data_1(src_a),
+        .rd_data_1(src_a_temp),
         .rd_data_2(mem_write_data)
     );
     mux2 #(5)     writeReg(
@@ -85,10 +86,22 @@ module datapath (
     );
 
     // ALU logic
-    mux2 srcB(
-        .selector(alu_src),
+    mux2 srcA(
+        .selector(alu_src_a),
+        .s0(src_a_temp),
+        .s1(mem_write_data),
+        .result(src_a)
+    );
+    mux2 srcB1(
+        .selector(alu_src_b),
         .s0(mem_write_data),
         .s1(sign_imm),
+        .result(src_b_temp)
+    );
+    mux2 srcB2(
+        .selector(alu_src_a),
+        .s0(src_b_temp),
+        .s1(shift_imm),
         .result(src_b)
     );
     alu  alu(
@@ -97,5 +110,11 @@ module datapath (
         .alu_control_i(alu_controller),
         .result_o(alu_result),
         .zero(zero)
+    );
+
+    // shift logic
+    unsign_extension #(5) shiftImm(
+        .in(instr[10:6]),
+        .out(shift_imm)
     );
 endmodule
