@@ -68,7 +68,7 @@ module main_decoder (
             6'b10_0011: controls = 13'b0000_1011_0000_0; // lw
             6'b10_1011: controls = 13'b0000_0XX1_1000_0; // sw
             6'b00_0100: controls = 13'b1000_0XX0_0001_0; // beq
-            6'b00_0101: controls = 13'b0100_0XX0_0001_0; // bnq
+            6'b00_0101: controls = 13'b0100_0XX0_0001_0; // bne
             6'b00_1000: controls = 13'b0000_1001_0000_0; // addi
             6'b00_1100: controls = 13'b0000_1001_0010_0; // andi
             6'b00_1101: controls = 13'b0000_1001_0011_0; // ori

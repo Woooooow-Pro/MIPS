@@ -198,7 +198,7 @@ CPU 核心可分为两个部分: `control_unit` 和 `datapath`, 分别表示控�
 
 其在实现中将控制信号用变量 `controls` 捆绑后集中赋值, 省去了书写大量赋值语句的麻烦, 具体如下.
 
-```sv
+```verilog
 assign {branch, jump, reg_we, reg_write_addr,
         reg_write_data, alu_src_b, mem_we, alu_op, alu_src_a} = controls;
 
