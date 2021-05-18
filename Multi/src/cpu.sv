@@ -1,4 +1,4 @@
-`timescale 1ns/ 1ps
+`timescale 1ns/1ps
 module cpu (
     input   logic   clk, rst,
 
@@ -16,7 +16,7 @@ module cpu (
         .mem_read_data,
         .mem_we(mem_we),
         .mem_write_data(mem_write_data),
-        .mem_write_addr(mem_data_addr)
+        .mem_data_addr(mem_data_addr)
 );
 
    memory memory(

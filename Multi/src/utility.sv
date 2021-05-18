@@ -82,35 +82,6 @@ module mux8 #(
     end
 endmodule
 
-// 1:2 sel
-
-// module sel2 (
-//     input   logic   in,
-//     input   logic   selector,
-//     output  logic   out0,
-//     output  logic   out1
-// );
-//     assign out0 = selector == 0? in: 0;
-//     assign out1 = selector == 1? in: 0;
-// endmodule
-
-// left shift 2
-module lshift2 (
-    input   logic   [31:0]in,
-    output  logic   [31:0]out
-);
-    assign out = {in[29:0], 2'b00};
-endmodule
-
-// adder
-module adder (
-    input   logic   [31:0] a,
-    input   logic   [31:0] b,
-    output  logic   [31:0] result
-);
-    assign result = a + b;
-endmodule
-
 // flip flop
 module flip_flop #(
 parameter WIDTH = 32
@@ -120,8 +91,8 @@ parameter WIDTH = 32
     input   logic   [WIDTH - 1:0]in,
     output  logic   [WIDTH - 1:0]out
 );
-    always_ff @(posedge clk, posedge rst) begin
-        if(rst || clk)
+    always_ff @(posedge clk,  rst) begin
+        if(rst)
             out <= 0;
         else if(we)
             out <= in;

@@ -44,7 +44,7 @@ module control_unit (
         .alu_op(alu_op),
         .alu_control(alu_controller)
     );
-    assign pc_reg_we = ((branch[1] & zero) | (branch[0] & !zero)) | pc_write;
+    assign pc_reg_we = ((branch[1] & zero) | (branch[0] & ~zero)) | pc_write;
 endmodule
 
 
@@ -71,7 +71,7 @@ module main_decoder (
     parameter Decode        = 5'b0_0001;
     parameter Jump          = 5'b0_0010;
     parameter LWorSW        = 5'b0_0011;
-    parameter LWMEMRead     = 5'b0_0100;
+    parameter LWMemRead     = 5'b0_0100;
     parameter SWMemWrite    = 5'b0_0101;
     parameter LWRegWrite    = 5'b0_0110;
     parameter Beq           = 5'b0_0111;
@@ -85,7 +85,7 @@ module main_decoder (
     parameter ShiftRA       = 5'b0_1111;
     parameter RType         = 5'b1_0000;
     parameter AluWriteBack  = 5'b1_0001;
-
+    parameter AluWriteBackImm = 5'b1_0010;
 
     parameter LW    = 6'b10_0011;
     parameter SW    = 6'b10_1011;
@@ -96,17 +96,16 @@ module main_decoder (
     parameter ORI   = 6'b00_1101;
     parameter J     = 6'b00_0010;
     parameter RTYPE = 6'b00_0000;
-
     parameter SLL   = 6'b00_0000;
     parameter SRL   = 6'b00_0010;
-    parameter SLA   = 6'b00_0011;
+    parameter SRA   = 6'b00_0011;
     parameter JR    = 6'b00_1000;
 
     logic [4:0]stat, nextstat;
 
     logic [18:0]controls;
     assign {branch, alu_src_a, alu_src_b, pc_src, instr_or_data,
-        instr_reg_we, pc_write, reg_write_addr, reg_write_data, mem_we,
+        instr_reg_we, pc_write, reg_we, reg_write_addr, reg_write_data, mem_we,
         alu_op} = controls;
 
     always_ff @( posedge clk or posedge rst ) begin
@@ -122,7 +121,7 @@ module main_decoder (
             Decode: case(operation)
                 LW:     nextstat = LWorSW;
                 SW:     nextstat = LWorSW;
-                BEN:    nextstat = Beq;
+                BEQ:    nextstat = Beq;
                 BNE:    nextstat = Bne;
                 ADDI:   nextstat = Addi;
                 ANDI:   nextstat = Andi;
@@ -139,19 +138,20 @@ module main_decoder (
                 default:nextstat = 5'bX_XXXX;
             endcase
 
-            LWorSW: case(operation):
-                LW: nextstat = LWMEMRead;
+            LWorSW: case(operation)
+                LW: nextstat = LWMemRead;
                 SW: nextstat = SWMemWrite;
                 default:nextstat = 5'bX_XXXX;
             endcase
 
-            LWMEMRead:  nextstat = LWRegWrite;
-            Addi:       nextstat = AluWriteBack;
-            Andi:       nextstat = AluWriteBack;
-            Ori:        nextstat = AluWriteBack;
+            LWMemRead:  nextstat = LWRegWrite;
+            Addi:       nextstat = AluWriteBackImm;
+            Andi:       nextstat = AluWriteBackImm;
+            Ori:        nextstat = AluWriteBackImm;
             ShiftLL:    nextstat = AluWriteBack;
             ShiftRL:    nextstat = AluWriteBack;
             ShiftRA:    nextstat = AluWriteBack;
+            RType:      nextstat = AluWriteBack;
 
             Jump:       nextstat = Fetch;
             SWMemWrite: nextstat = Fetch;
@@ -159,32 +159,34 @@ module main_decoder (
             Beq:        nextstat = Fetch;
             Bne:        nextstat = Fetch;
             Jr:         nextstat = Fetch;
-            AluWriteBack:nextstat = Fetch;
+            AluWriteBack:   nextstat = Fetch;
+            AluWriteBackImm:nextstat = Fetch;
             default:nextstat = 5'bX_XXXX;
         endcase
     end
 
     always_comb begin
         case(stat)
-            Fetch:      19'b0000_0010_0011_0000_000;
-            Decode:     19'b0000_0110_0000_0000_000;
-            Jr:         19'b0000_0001_1001_0000_000;
-            Jump:       19'b0000_0001_0001_0000_000;
-            Beq:        19'b1001_0000_1000_0000_000;
-            Bne:        19'b0101_0000_1000_0000_000;
-            LWorSW:     19'b0001_0100_0000_0000_000;
-            LWMemRead:  19'b0000_0000_0100_0000_000;
-            SWMemRead:  19'b0000_0000_0100_0001_000;
-            LWRegWrite: 19'b0000_0000_0000_1000_000;
-            Addi:       19'b0001_0100_0000_0000_000;
-            Andi:       19'b0001_0100_0000_0000_010;
-            Ori:        19'b0001_0100_0000_0000_011;
-            ShiftLL:    19'b0010_1000_0000_0000_100;
-            ShiftRL:    19'b0010_1000_0000_0000_101;
-            ShiftRA:    19'b0010_1000_0000_0000_110;
-            RType:      19'b0001_0000_0000_0000_111;
-            AluWriteBack: 19'b0000_0000_0000_1100_000;
-            default:    19'bXXXX_XXXX_XXXX_XXXX_XXX;
+            Fetch:      controls = 19'b0000_0010_0011_0000_000;
+            Decode:     controls = 19'b0000_0110_0000_0000_000;
+            Jr:         controls = 19'b0000_0001_1001_0000_000;
+            Jump:       controls = 19'b0000_0001_0001_0000_000;
+            Beq:        controls = 19'b1001_0000_1000_0000_000;
+            Bne:        controls = 19'b0101_0000_1000_0000_000;
+            LWorSW:     controls = 19'b0001_0100_0000_0000_000;
+            LWMemRead:  controls = 19'b0000_0000_0100_0000_000;
+            SWMemWrite: controls = 19'b0000_0000_0100_0001_000;
+            LWRegWrite: controls = 19'b0000_0000_0000_1010_000;
+            Addi:       controls = 19'b0001_0100_0000_0000_000;
+            Andi:       controls = 19'b0001_0100_0000_0000_010;
+            Ori:        controls = 19'b0001_0100_0000_0000_011;
+            ShiftLL:    controls = 19'b0010_1000_0000_0000_100;
+            ShiftRL:    controls = 19'b0010_1000_0000_0000_101;
+            ShiftRA:    controls = 19'b0010_1000_0000_0000_110;
+            RType:      controls = 19'b0001_0000_0000_0000_111;
+            AluWriteBack:   controls = 19'b0000_0000_0000_1100_000;
+            AluWriteBackImm:controls = 19'b0000_0000_0000_1000_000;
+            default:    controls = 19'bXXXX_XXXX_XXXX_XXXX_XXX;
         endcase
     end
 endmodule

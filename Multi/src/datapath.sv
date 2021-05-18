@@ -16,7 +16,7 @@ module datapath (
     output  logic   [5:0]operation,
     output  logic   [5:0]func,
     output  logic   [31:0]mem_write_data,
-    output  logic   [31:0]mem_write_addr,
+    output  logic   [31:0]mem_data_addr
 );
 
     logic [31:0]pc, pc_next;
@@ -45,20 +45,20 @@ module datapath (
 
     // mux4 choose pc next
     mux4 pcNext(
-        .selector(),
+        .selector(pc_src),
         .s0(alu_result),
         .s1(alu_reg_out),
-        .s2(pc[31:28], instr[25:0], 2'b00),
+        .s2({pc[31:28], instr[25:0], 2'b00}),
         .s3(reg_out1),
-        .result(alu_src_a)
+        .result(pc_next)
     );
 
-    // mux2 choose mem_write_addr
+    // mux2 choose mem_data_addr
     mux2 memWriteAddr(
         .selector(instr_or_data),
         .s0(pc),
-        .s1(alu_result),
-        .result(mem_write_addr)
+        .s1(alu_reg_out),
+        .result(mem_data_addr)
     );
 
     // instruct register
@@ -82,7 +82,7 @@ module datapath (
     // mux2 choose reg_file_write_data
     mux2 regFileWriteDataMux2(
         .selector(reg_write_data),
-        .s0(alu_result),
+        .s0(alu_reg_out),
         .s1(mem_data2reg_file),
         .result(reg_file_write_data)
     );
@@ -142,7 +142,7 @@ module datapath (
         .s1(reg_out1),
         .s2(reg_out2),
         .s3(),
-        .result(alu_src_a)
+        .result(src_a)
     );
 
     mux8 getAluSrcB(
@@ -155,13 +155,13 @@ module datapath (
         .s5(),
         .s6(),
         .s7(),
-        .result(alu_src_b)
+        .result(src_b)
     );
 
     // alu operation
     alu alu(
-        .a_i(alu_src_a),
-        .b_i(alu_src_b),
+        .a_i(src_a),
+        .b_i(src_b),
         .alu_control_i(alu_controller),
         .result_o(alu_result),
         .zero(zero)

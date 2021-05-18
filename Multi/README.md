@@ -113,6 +113,7 @@ state "S14: ShiftRL" as S14
 state "S15: ShiftRA" as S15
 state "S16: RType" as S16
 state "S17: AluWriteBack" as S17
+state "S18: AluWriteBackImm" as S18
 state "S00: nextFetch" as S00
 
 S0 -> S1
@@ -134,9 +135,9 @@ S1 --> S13: Op = R-Type and func = sll
 S1 --> S14: Op = R-Type and func = srl
 S1 --> S15: Op = R-Type and func = sra
 S1 --> S16: Op = R-Type
-S9 --> S17
-S10 --> S17
-S11 --> S17
+S9 --> S18
+S10 --> S18
+S11 --> S18
 
 ' R-Type
 S13 --> S17
@@ -149,6 +150,7 @@ S5 --> S00
 S7 --> S00
 S8 --> S00
 S17 --> S00
+S18 --> S00
 ```
 
 output  logic   [1:0]branch,
@@ -164,7 +166,7 @@ output  logic   [1:0]branch,
     output  logic   mem_we,
     output  logic   [2:0]alu_op
 
-| **state ** | branch | alu_src_a | alu_src_b | pc_src | instr_or_data | instr_reg_we | pc_write | reg_we | reg_write_addr | reg_write_data | mem_we | alu_op |
+| **state** | branch | alu_src_a | alu_src_b | pc_src | instr_or_data | instr_reg_we | pc_write | reg_we | reg_write_addr | reg_write_data | mem_we | alu_op |
 | ---------- | ------ | --------- | --------- | ------ | ------------- | ------------ | -------- | ------ | -------------- | -------------- | ------ | ------ |
 | **Fetch** | 00 | 00 | 001 | 00 | 0 | 1 | 1 | 0 | 0 | 0 | 0 | 000 |
 | **Decode** | 00 | 00 | 011 | 00 | 0 |0 | 0 | 0 | 0 | 0 | 0 | 000 |
@@ -175,7 +177,7 @@ output  logic   [1:0]branch,
 | **LWorSW** | 00 | 01 | 010 | 00 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 000 |
 | **LWMemRead** | 00 | 00 | 000 | 00 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 000 |
 | **SWMemRead** | 00 | 00 | 000 | 00 | 1 | 0 | 0 | 0 | 0 | 0 | 1 | 000 |
-| **LWRegWrite** | 00 | 00 | 000 | 00 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 000 |
+| **LWRegWrite** | 00 | 00 | 000 | 00 | 0 | 0 | 0 | 1 | 0 | 1 | 0 | 000 |
 | **Addi** | 00 | 01 | 010 | 00 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 000 |
 | **Andi** | 00 | 01 | 010 | 00 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 010 |
 | **Ori** | 00 | 01 | 010 | 00 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 011 |
@@ -184,4 +186,37 @@ output  logic   [1:0]branch,
 | **ShiftRA** | 00 | 10 | 100 | 00 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 110 |
 | **RType** | 00 | 01 | 000 | 00 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 111 |
 | **AluWriteBack** | 00 | 00 | 000 | 00 | 0 | 0 | 0 | 1 | 1 | 0 | 0 | 000 |
+| **AluWriteBackImm** | 00 | 00 | 000 | 00 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 000 |
 
+
+
+```asm
+main:   addi    $t0, $0, 5      ; initialize $t0 = 5            20080005
+        addi    $t1, $0, 12     ; initialize $t1 = 12           2009000c
+        addi    $t2, $t1, -9    ; initialize $t2 = 3            212afff7
+        ori     $t3, $t0, 2     ; initialize $t3 = 7            350b0002
+        andi    $t4, $t0, 7     ; initialize $t4 = 5            310c0007
+        addi    $t5, $0, -7     ; initialize $t5 = -7           200dfff9
+        sub     $t0, $t3, $t2   ; set $t0 = $t3 - $t2 = 4       016a4022
+        add     $t1, $t3, $t2   ; set $t1 = $t3 + $t2 = 10      016a4820
+        or      $t2, $t0, $t2   ; set $t2 = $t1 | $t2 = 7       010a5025
+        and     $t3, $t0, $t3   ; set $t3 = $t1 & $t3 = 4       010b5824
+        sll     $t0, $t0, 2     ; set $t0 = $t0 << 2 = 16       00084080
+        srl     $t2, $t2, 2     ; set $t2 = $t2 >> 2 = 1        000a5082
+        sra     $t5, $t5, 1     ; set $t5 = $t5 >>> 1 = -3      000d6843
+        beq     $t0, $t3, end   ; shouldn't be taken            110b0007
+        slt     $t0, $t0, $t1   ; set $t0 = $t0 < $t1 = 0       0109402a
+        bne     $t0, $t1, around; should be taken               15090001
+        addi    $t5, $t5, 3     ; should not happen             21ad0003
+
+around: sw      $t5, 70($t1)    ; mem[512] = -3                 ad2d01f6
+        lw      $t0, 512($0)    ; $t0 = mem[512] = -3           8c080200
+        j jump                  ; jump to jump                  08000016
+        andi    $t1, $t1, 0     ; should not happen             31290000
+
+jump:   addi    $t1, $0, 96     ; set $t1 = end                 20090064
+        jr      $t1             ; jump to end                   01200008
+        addi    $t5, $t5, 5     ; shouldn't taken               21ad0005
+
+end:    sw      $t5, 516($0)    ; mem[516] = $2 = -3            ac0d0204
+```

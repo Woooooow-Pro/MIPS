@@ -9,7 +9,7 @@ module memory #(
     logic [31:0] RAM [Size - 1:0];
 
     initial begin
-        $readmemh("memfile.dat", RAM);
+        $readmemh("instr.dat", RAM);
     end
 
     always_ff @(posedge clk) begin
