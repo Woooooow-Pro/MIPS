@@ -211,7 +211,7 @@ main:   addi    $t0, $0, 5      ; initialize $t0 = 5            20080005
 
 around: sw      $t5, 70($t1)    ; mem[512] = -3                 ad2d01f6
         lw      $t0, 512($0)    ; $t0 = mem[512] = -3           8c080200
-        j jump                  ; jump to jump                  08000016
+        jal jump                ; jump to jump, $ra = pc + 4    0c000016
         andi    $t1, $t1, 0     ; should not happen             31290000
 
 jump:   addi    $t1, $0, 96     ; set $t1 = end                 20090064

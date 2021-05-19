@@ -1,8 +1,8 @@
 module datapath (
     input   logic   clk, rst,
     input   logic   reg_we,
-    input   logic   reg_write_addr,
-    input   logic   reg_write_data,
+    input   logic   [1:0]reg_write_addr,
+    input   logic   [1:0]reg_write_data,
     input   logic   instr_reg_we,
     input   logic   instr_or_data,
     input   logic   pc_reg_we,
@@ -22,10 +22,10 @@ module datapath (
     logic [31:0]pc, pc_next;
     logic [31:0]instr;
     logic [31:0]mem_data2reg_file;
-    logic [31:0]reg_file_write_data, reg_file_write_addr,
-        reg_file_read1, reg_file_read2, reg_out1, reg_out2;
+    logic [31:0]reg_file_write_data, reg_file_read1, reg_file_read2, reg_out1, reg_out2;
     logic [31:0] src_a, src_b, alu_result, alu_reg_out;
     logic [31:0] imm, shift_imm;
+    logic [4:0]reg_file_write_addr;
 
     // set operation and func
     assign operation = instr[31:26];
@@ -79,19 +79,23 @@ module datapath (
         .out(mem_data2reg_file)
     );
 
-    // mux2 choose reg_file_write_data
-    mux2 regFileWriteDataMux2(
+    // mux4 choose reg_file_write_data
+    mux4 regFileWriteDataMux4(
         .selector(reg_write_data),
         .s0(alu_reg_out),
         .s1(mem_data2reg_file),
+        .s2(pc),
+        .s3(),
         .result(reg_file_write_data)
     );
 
-    // mux2 choose reg file wrtie addr
-    mux2 regFileWriteAddrMux2(
+    // mux4 choose reg file wrtie addr
+    mux4 regFileWriteAddrMux4(
         .selector(reg_write_addr),
         .s0(instr[20:16]),
         .s1(instr[15:11]),
+        .s2({5'd31}),
+        .s3(),
         .result(reg_file_write_addr)
     );
 

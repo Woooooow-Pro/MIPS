@@ -5,9 +5,8 @@ module mips (
     output  logic   [31:0]mem_write_data,
     output  logic   [31:0]mem_data_addr
 );
-    logic zero, instr_or_data, instr_reg_we, reg_we, reg_write_addr,
-        reg_write_data, mem_we, pc_reg_we;
-    logic [1:0]alu_src_a, pc_src;
+    logic zero, instr_or_data, instr_reg_we, reg_we, mem_we, pc_reg_we;
+    logic [1:0]alu_src_a, pc_src, reg_write_addr, reg_write_data;
     logic [2:0]alu_src_b;
     logic [2:0]alu_controller;
     logic [5:0]operation, func;
