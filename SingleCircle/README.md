@@ -1,4 +1,4 @@
-# Single-Clycle CPU
+# Single-Cycle CPU
 
 32 位单周期 MIPS 指令集 CPU, 利用 systemverilog 编写
 
