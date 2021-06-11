@@ -166,7 +166,7 @@ alu_op | alu_control | operation
 
 ![6](img/6.png)
 
-`mips`: 包单周期 CPU 的数据通路和控制模块
+`mips`: 包含单周期 CPU 的数据通路和控制模块
 
 `DataMemoryDecoder`: 实现了将 I/O 接口的地址空间映像到存储器的部分地址空间
 
@@ -322,7 +322,7 @@ end
 
    使用时从 `in` 读入待扩展的数据, 从 `out` 输出扩展后的数据.
 
-5. adder
+5. `adder`
 
    ```verilog
    // utility.sv
