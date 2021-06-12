@@ -1,6 +1,5 @@
 # Multi-Cycle CPU
 
-*18307130094 陈冠多*
 
 32 位单周期 MIPS 指令集 CPU, 利用 systemverilog 编写
 
