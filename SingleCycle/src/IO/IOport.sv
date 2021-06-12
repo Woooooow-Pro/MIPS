@@ -11,7 +11,7 @@ module IOport (
     input   logic   [15:0]switch,
     output  logic   [11:0]led
 );
-    
+
     logic   [1:0]reg_status;
     logic   [15:0]reg_switch;
     logic   [11:0]reg_led;

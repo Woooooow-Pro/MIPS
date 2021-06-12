@@ -58,9 +58,9 @@ module main_decoder (
         case(operation)
             6'b00_0000: begin
                 case (func)
-                    6'b00_0000: controls = 13'b0000_1001_0100_1; // sll
-                    6'b00_0010: controls = 13'b0000_1001_0101_1; // srl
-                    6'b00_0011: controls = 13'b0000_1001_0110_1; // sra
+                    6'b00_0000: controls = 13'b0000_1101_0100_1; // sll
+                    6'b00_0010: controls = 13'b0000_1101_0101_1; // srl
+                    6'b00_0011: controls = 13'b0000_1101_0110_1; // sra
                     6'b00_1000: controls = 13'bXX10_0XXX_0XXX_0; // jr
                     default:    controls = 13'b0000_1100_0111_0;
                 endcase
