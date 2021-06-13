@@ -1060,22 +1060,22 @@ main:   addi    $t0, $0, 5      ; initialize $t0 = 5            20080005
         and     $t3, $t0, $t3   ; set $t3 = $t1 & $t3 = 4       010b5824
         sll     $t0, $t0, 2     ; set $t0 = $t0 << 2 = 16       00084080
         srl     $t2, $t2, 2     ; set $t2 = $t2 >> 2 = 1        000a5082
-        sra     $t5, $t5, 1     ; set $t5 = $t5 >>> 1 = -3      000d6843
+        sra     $t5, $t5, 1     ; set $t5 = $t5 >>> 1 = -4      000d6843
         beq     $t0, $t3, end   ; shouldn't be taken            110b0007
         slt     $t0, $t0, $t1   ; set $t0 = $t0 < $t1 = 0       0109402a
         bne     $t0, $t1, around; should be taken               15090001
         addi    $t5, $t5, 3     ; should not happen             21ad0003
 
-around: sw      $t5, 70($t1)    ; mem[512] = -3                 ad2d01f6
-        lw      $t0, 512($0)    ; $t0 = mem[512] = -3           8c080200
+around: sw      $t5, 70($t1)    ; mem[512] = -4                 ad2d01f6
+        lw      $t0, 512($0)    ; $t0 = mem[512] = -4           8c080200
         jal jump                ; jump to jump, $ra = pc + 4    0c000016
         andi    $t1, $t1, 0     ; should not happen             31290000
 
-jump:   addi    $t1, $0, 96     ; set $t1 = end                 20090064
+jump:   addi    $t1, $0, 100    ; set $t1 = end                 20090064
         jr      $t1             ; jump to end                   01200008
         addi    $t5, $t5, 5     ; shouldn't taken               21ad0005
 
-end:    sw      $t5, 516($0)    ; mem[516] = $2 = -3            ac0d0204
+end:    sw      $t5, 516($0)    ; mem[516] = $2 = -4            ac0d0204
 ```
 
 由于 `jal` 和 `j` 的差异在于前者往 `ra` 寄存器中加入了此刻 `PC + 4` 的值, 因此这里就直接把 `jal` 当作 `j` 用了, 后面看看 `regfile` 里 `ra` 是否存了下一条指令的地址就能判断正确性了.

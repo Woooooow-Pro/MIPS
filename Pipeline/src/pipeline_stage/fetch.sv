@@ -27,7 +27,7 @@ module fetch (
     mux4 pcNext(
         .selector(jump),
         .s0(pc_branch_next), // beq, bne & normal instructor
-        .s1({pc_plus_4_f[31:28], instr_d[25:0], 2'b00}), // jal, j
+        .s1({pc_f[31:28], instr_d[25:0], 2'b00}), // jal, j
         .s2(reg_src_a_d),  // jr
         .s3(),
         .result(pc_next_f)

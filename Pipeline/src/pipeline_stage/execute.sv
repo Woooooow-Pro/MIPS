@@ -17,7 +17,7 @@ module execute (
     // input   logic   jal_e,
 
     output  logic   reg_we_e,
-    output  logic   sel_reg_write_data_e
+    output  logic   sel_reg_write_data_e,
     output  logic   [2:0]control_e_o,
     output  logic   [31:0]alu_result_e,
     output  logic   [31:0]mem_write_data_e,
@@ -26,7 +26,7 @@ module execute (
     logic mem_we_e, sel_alu_src_a_e, sel_reg_write_addr_e, sel_jal_e;
     logic [1:0]sel_alu_src_b_e;
     logic [2:0]alu_control_e;
-    logic [31:0]read_data_1, read_data_2, alr_src_a, alu_src_b, alu_result_temp;
+    logic [31:0]read_data_1, read_data_2, alu_src_a, alu_src_b, alu_result_temp;
 
     assign {reg_we_e, sel_reg_write_data_e, mem_we_e, alu_control_e, sel_alu_src_a_e,
         sel_alu_src_b_e, sel_reg_write_addr_e, sel_jal_e} = control_e_i;
@@ -54,7 +54,7 @@ module execute (
         .selector(sel_alu_src_a_e),
         .s0(read_data_1),
         .s1(read_data_2),
-        .result(alr_src_a)
+        .result(alu_src_a)
     );
     mux4 aluSrcBMux4(
         .selector(sel_alu_src_b_e),
@@ -62,11 +62,11 @@ module execute (
         .s1(imm_e),
         .s2(shamt_e),
         .s3(),
-        .result(alr_src_b)
+        .result(alu_src_b)
     );
     alu aluResult(
-        .a_i(alr_src_a),
-        .b_i(alr_src_b),
+        .a_i(alu_src_a),
+        .b_i(alu_src_b),
         .alu_control_i(alu_control_e),
         .result_o(alu_result_temp)
     );

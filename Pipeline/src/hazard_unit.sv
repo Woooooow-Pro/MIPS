@@ -60,7 +60,7 @@ module hazard_unit (
         && (reg_we_e && (rs_d == reg_write_addr_e || rt_d == reg_write_addr_e)
         || sel_reg_write_data_m && (rs_d == reg_write_addr_m || rt_d == reg_write_addr_m));
 
-    assign stall_d = lw_stall || branch_stall;
+    assign stall_d = (branch_stall || lw_stall) === 'X ? 1'b0 : (lw_stall || branch_stall);
     assign flush_e = stall_d;
     assign flush_d = pc_src_d || jump_d;
     assign stall_f = stall_d;

@@ -12,5 +12,5 @@ module fetch_reg (
         .in(pc_next_f),
         .out(pc_f)
     );
-    
+
 endmodule: fetch_reg

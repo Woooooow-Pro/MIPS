@@ -31,7 +31,7 @@ module control_unit (
     alu_decoder alu_decoder(
         .func(func),
         .alu_op(alu_op),
-        .alu_control(alu_controll)
+        .alu_control(alu_control)
     );
     assign pc_src = (branch[1] & !equal) | (branch[0] & equal);
     assign control = {reg_we, sel_reg_write_data, mem_we, alu_control, sel_alu_src_a,
@@ -63,19 +63,19 @@ module main_decoder (
                     6'b00_0000: controls = 15'b00_1_1_0_0_1_10_100_00_0; // sll
                     6'b00_0010: controls = 15'b00_1_1_0_0_1_10_101_00_0; // srl
                     6'b00_0011: controls = 15'b00_1_1_0_0_1_10_110_00_0; // sra
-                    6'b00_1000: controls = 15'b10_0_X_0_0_0_00_000_00_0; // jr
+                    6'b00_1000: controls = 15'b10_0_0_0_0_0_00_000_00_0; // jr
                     default:    controls = 15'b00_1_1_0_0_0_00_111_00_0; // R-Type
                 endcase
             end
             6'b10_0011: controls = 15'b00_1_0_1_0_0_01_000_00_0; // lw
             6'b10_1011: controls = 15'b00_0_0_0_1_0_01_000_00_0; // sw
-            6'b00_0100: controls = 15'b00_0_X_0_0_0_00_000_01_0; // beq
-            6'b00_0101: controls = 15'b00_0_X_0_0_0_00_000_10_0; // bne
+            6'b00_0100: controls = 15'b00_0_0_0_0_0_00_000_01_0; // beq
+            6'b00_0101: controls = 15'b00_0_0_0_0_0_00_000_10_0; // bne
             6'b00_1000: controls = 15'b00_1_0_0_0_0_01_000_00_0; // addi
             6'b00_1100: controls = 15'b00_1_0_0_0_0_01_010_00_0; // andi
             6'b00_1101: controls = 15'b00_1_0_0_0_0_01_011_00_0; // ori
-            6'b00_0010: controls = 15'b01_0_X_0_0_0_00_000_00_0; // j
-            6'b00_0010: controls = 15'b01_1_X_0_0_0_00_000_00_1; // jal
+            6'b00_0010: controls = 15'b01_0_0_0_0_0_00_000_00_0; // j
+            6'b00_0011: controls = 15'b01_1_0_0_0_0_00_000_00_1; // jal
             default:    controls = 15'bXXX_XXXX_XXXX_XXXX; // illegal op
         endcase
     end

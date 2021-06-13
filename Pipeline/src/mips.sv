@@ -5,7 +5,8 @@ module mips (
     logic stall_f, stall_d, flush_d, forward_a_d, forward_b_d, flush_e;
     logic [1:0]forward_a_e, forward_b_e;
 
-    logic pc_src_d, equal, reg_we_e, sel_reg_write_data_e, reg_we_w;
+    logic pc_src_d, equal, reg_we_e, sel_reg_write_data_e,
+        reg_we_m, sel_reg_write_data_m, reg_we_w;
     logic [1:0]jump, branch, control_m_o, control_w;
     logic [2:0]control_e_o, control_m;
     logic [10:0]control_d, control_e;
@@ -117,6 +118,8 @@ module mips (
         .alu_result_m(alu_result_m),
         .forward_a_e(forward_a_e),
         .forward_b_e(forward_b_e),
+        .reg_we_e(reg_we_e),
+        .sel_reg_write_data_e(sel_reg_write_data_e),
         .control_e_o(control_e_o),
         .alu_result_e(alu_result_e),
         .mem_write_data_e(mem_write_data_e),
@@ -139,6 +142,8 @@ module mips (
         .control_m_i(control_m),
         .alu_result_m(alu_result_m),
         .mem_write_data_m(mem_write_data_m),
+        .sel_reg_write_data_m(sel_reg_write_data_m),
+        .reg_we_m(reg_we_m),
         .control_m_o(control_m_o),
         .mem_read_data_m(mem_read_data_m)
     );

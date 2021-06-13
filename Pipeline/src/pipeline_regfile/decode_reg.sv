@@ -6,7 +6,7 @@ module decode_reg (
     input   logic   [31:0]pc_plus_4_f,
 
     output  logic   [31:0]instr_d,
-    output  logic   [31:0]pc_plus_4_d,
+    output  logic   [31:0]pc_plus_4_d
 );
     flip_flop instrReg(
         .clk(clk),

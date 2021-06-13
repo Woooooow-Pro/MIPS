@@ -64,12 +64,12 @@ module decode (
     );
     adder getPcBranch(
         .a(pc_plus_4_d),
-        .b({imm[29:0], 2'b00}),
+        .b({imm_d[29:0], 2'b00}),
         .result(pc_branch_d)
     );
 
     unsign_extension shamtExtension(
-        .in(inst_d[10:6]),
-        .out(shamt_d),
+        .in(instr_d[10:6]),
+        .out(shamt_d)
     );
 endmodule: decode
