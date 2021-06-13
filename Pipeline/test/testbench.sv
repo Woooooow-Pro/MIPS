@@ -12,7 +12,7 @@ module testbench(
         reset <= 0;
     end
 
-    mips dut(clk,reset);
+    cpu dut(clk,reset);
 
     always begin
         clk <= 1;

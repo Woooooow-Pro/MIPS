@@ -7,8 +7,7 @@ module fetch (
     input   logic   [1:0]jump,
 
     output  logic   [31:0]pc_next_f,
-    output  logic   [31:0]pc_plus_4_f,
-    output  logic   [31:0]instr_f
+    output  logic   [31:0]pc_plus_4_f
 );
     logic [31:0]pc_branch_next;
 
@@ -33,8 +32,4 @@ module fetch (
         .result(pc_next_f)
     );
 
-    instr_mem getInstrF(
-        .pc_addr(pc_f[7:2]),
-        .instr(instr_f)
-    );
 endmodule: fetch

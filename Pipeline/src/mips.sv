@@ -1,6 +1,13 @@
 module mips (
     input   logic   clk,
-    input   logic   rst
+    input   logic   rst,
+    input   logic   [31:0]instr,
+    input   logic   [31:0]mem_read_data,
+
+    output  logic   [31:0]pc,
+    output  logic   mem_we,
+    output  logic   [31:0]mem_data_addr,
+    output  logic   [31:0]mem_write_data
 );
     logic stall_f, stall_d, flush_d, forward_a_d, forward_b_d, flush_e;
     logic [1:0]forward_a_e, forward_b_e;
@@ -21,6 +28,14 @@ module mips (
     logic [31:0]alu_result_m, mem_write_data_m, mem_read_data_m;
     logic [31:0]mem_read_data_w, reg_write_data_w, alu_result_w;
 
+    assign pc = pc_f;
+    assign instr_f = instr;
+
+    assign mem_data_addr = alu_result_m;
+    assign mem_write_data = mem_write_data_m;
+    assign mem_read_data_m = mem_read_data;
+
+
     fetch_reg fetchReg(
         .clk,
         .rst,
@@ -36,8 +51,7 @@ module mips (
         .pc_src_d(pc_src_d),
         .jump(jump),
         .pc_next_f(pc_next_f),
-        .pc_plus_4_f(pc_plus_4_f),
-        .instr_f(instr_f)
+        .pc_plus_4_f(pc_plus_4_f)
     );
     decode_reg decodeReg(
         .clk,
@@ -138,14 +152,11 @@ module mips (
         .reg_write_addr_m(reg_write_addr_m)
     );
     memory memory(
-        .clk,
         .control_m_i(control_m),
-        .alu_result_m(alu_result_m),
-        .mem_write_data_m(mem_write_data_m),
         .sel_reg_write_data_m(sel_reg_write_data_m),
         .reg_we_m(reg_we_m),
-        .control_m_o(control_m_o),
-        .mem_read_data_m(mem_read_data_m)
+        .mem_we_m(mem_we),
+        .control_m_o(control_m_o)
     );
     writeback_reg writebackReg(
         .clk,
