@@ -1,7 +1,7 @@
 # Multi-Cycle CPU
 
 
-32 位单周期 MIPS 指令集 CPU, 利用 systemverilog 编写
+32 位多周期 MIPS 指令集 CPU, 利用 systemverilog 编写
 
 ## 1. 设计原理
 
@@ -97,27 +97,27 @@ stateDiagram-v2
 
 ### 2.1 实现指令集
 
-```txt
-add $rd, $rs, $rt # [rd] = [rs] + [rt]
-sub $rd, $rs, $rt # [rd] = [rs] - [rt]
-and $rd, $rs, $rt # [rd] = [rs] & [rt]
-or $rd, $rs, $rt # [rd] = [rs] | [rt]
-slt $rd, $rs, $rt # [rd] = [rs] < [rt] ? 1 : 0
+```text {.line-numbers}
+add $rd, $rs, $rt   # [rd] = [rs] + [rt]
+sub $rd, $rs, $rt   # [rd] = [rs] - [rt]
+and $rd, $rs, $rt   # [rd] = [rs] & [rt]
+or $rd, $rs, $rt    # [rd] = [rs] | [rt]
+slt $rd, $rs, $rt   # [rd] = [rs] < [rt] ? 1 : 0
 sll $rd, $rt, shamt # [rd] = [rt] << shamt
 srl $rd, $rt, shamt # [rd] = [rt] >> shamt
 sra $rd, $rt, shamt # [rd] = [rt] >>> shamt
-addi $rt, $rs, imm # [rt] = [rs] + SignImm
-andi $rt, $rs, imm # [rt] = [rs] & ZeroImm
-ori $rt, $rs, imm # [rt] = [rs] | ZeroImm
-slti $rt, $rs, imm # [rt] = [rs] < SignImm ? 1 : 0
-lw $rt, imm($rs) # [rt] = [Address]
-sw $rt, imm($rs) # [Address] = [rt]
-j label # PC = JTA
-jal label # [ra] = PC + 4, PC = JTA
-jr $rs # PC = [rs]
+addi $rt, $rs, imm  # [rt] = [rs] + SignImm
+andi $rt, $rs, imm  # [rt] = [rs] & ZeroImm
+ori $rt, $rs, imm   # [rt] = [rs] | ZeroImm
+slti $rt, $rs, imm  # [rt] = [rs] < SignImm ? 1 : 0
+lw $rt, imm($rs)    # [rt] = [Address]
+sw $rt, imm($rs)    # [Address] = [rt]
+j label             # PC = JTA
+jal label           # [ra] = PC + 4, PC = JTA
+jr $rs              # PC = [rs]
 beq $rs, $rt, label # if ([rs] == [rt]) PC = BTA
 bne $rs, $rt, label # if ([rs] != [rt]) PC = BTA
-nop # No operation
+nop                 # No operation
 ```
 
 其中使用的符号释义如下：
@@ -126,12 +126,12 @@ nop # No operation
 - `imm`：I 类型指令的 16 位立即数字段
 - `addr`：J 类型指令的 26 位地址字段
 - `label`：指定指令地址的文本
-- `SignImm`：32 位符号扩展的立即数（`= {{16{imm[15]}}, imm}`）
-- `ZeroImm`：32 位 0 扩展的立即数（`= {16'b0, imm}`）
+- `SignImm`：32 位符号扩展的立即数 ( `= {{16{imm[15]}}, imm}` )
+- `ZeroImm`：32 位 0 扩展的立即数 ( `= {16'b0, imm}` )
 - `Address`：`[rs] + SignImm`
 - `[Address]`：存储器单元 `Address` 地址中的内容
-- `JTA`：跳转目标地址（`= {(PC + 4)[31:28], addr, 2'b0}`）
-- `BTA`：分支目标地址（`= PC + 4 + (SignImm << 2)`）
+- `JTA`：跳转目标地址 ( `= {(PC + 4)[31:28], addr, 2'b0}` )
+- `BTA`：分支目标地址 ( `= PC + 4 + (SignImm << 2)` )
 
 相对单周期多写了个 `jal`, 主要是发现这个莫名的好写, 而且写完后基本能跑大部分机器码了, 至于其他的比如 `bne` 系列的就懒得再写了, 和我写的没太大差别, 感觉没啥意思.
 

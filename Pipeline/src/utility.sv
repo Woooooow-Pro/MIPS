@@ -71,36 +71,6 @@ module mux4 #(
     end
 endmodule: mux4
 
-// 8-to-1 multiplexer
-// module mux8 #(
-//     parameter Width = 32
-// )(
-//     input   logic   [2:0]selector,
-//     input   logic   [Width - 1:0]s0,
-//     input   logic   [Width - 1:0]s1,
-//     input   logic   [Width - 1:0]s2,
-//     input   logic   [Width - 1:0]s3,
-//     input   logic   [Width - 1:0]s4,
-//     input   logic   [Width - 1:0]s5,
-//     input   logic   [Width - 1:0]s6,
-//     input   logic   [Width - 1:0]s7,
-//     output  logic   [Width - 1:0]result
-// );
-//     always_comb begin
-//         case (selector)
-//             3'b000: result = s0;
-//             3'b001: result = s1;
-//             3'b010: result = s2;
-//             3'b011: result = s3;
-//             3'b100: result = s4;
-//             3'b101: result = s5;
-//             3'b110: result = s6;
-//             3'b111: result = s7;
-//             default: result = 0;
-//         endcase
-//     end
-// endmodule: mux8
-
 // flip flop
 module flip_flop #(
 parameter WIDTH = 32
