@@ -6,10 +6,13 @@ module fetch (
     input   logic   pc_src_d,
     input   logic   [1:0]jump,
 
+    input   logic   predict_miss,
+    input   logic   [31:0]predict_pc,
+
     output  logic   [31:0]pc_next_f,
     output  logic   [31:0]pc_plus_4_f
 );
-    logic [31:0]pc_branch_next;
+    logic [31:0]pc_branch_next, pc_next_temp;
 
     adder pcAdd4(
         .a(pc_f),
@@ -29,6 +32,13 @@ module fetch (
         .s1({pc_f[31:28], instr_d[25:0], 2'b00}), // jal, j
         .s2(reg_src_a_d),  // jr
         .s3(),
+        .result(pc_next_temp)
+    );
+
+    mux2 pcPredict(
+        .selector(predict_miss | jump[1]),
+        .s0(predict_pc),
+        .s1(pc_next_temp),
         .result(pc_next_f)
     );
 

@@ -15,6 +15,8 @@ module hazard_unit (
     input   logic   [4:0]reg_write_addr_w,
     input   logic   reg_we_w,
 
+    input   logic   predict_miss,
+
     output  logic   stall_f,
     output  logic   stall_d,
     output  logic   flush_d,
@@ -61,8 +63,8 @@ module hazard_unit (
         || sel_reg_write_data_m && (rs_d == reg_write_addr_m || rt_d == reg_write_addr_m));
 
     assign stall_d = (branch_stall || lw_stall) === 'X ? 1'b0 : (lw_stall || branch_stall);
-    assign flush_e = stall_d;
-    assign flush_d = pc_src_d || jump_d;
+    assign flush_e = stall_d || predict_miss;
+    assign flush_d = predict_miss || jump_d;
     assign stall_f = stall_d;
 
 endmodule: hazard_unit

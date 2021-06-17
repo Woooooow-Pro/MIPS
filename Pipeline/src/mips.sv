@@ -28,6 +28,11 @@ module mips (
     logic [31:0]alu_result_m, mem_write_data_m, mem_read_data_m;
     logic [31:0]mem_read_data_w, reg_write_data_w, alu_result_w;
 
+    // predict
+
+    logic is_branch_d, miss, last_taken;
+    logic [31:0]predict_pc;
+
     assign pc = pc_f;
     assign instr_f = instr;
 
@@ -35,6 +40,22 @@ module mips (
     assign mem_write_data = mem_write_data_m;
     assign mem_read_data_m = mem_read_data;
 
+    // predict
+    assign is_branch_d = branch[1] || branch[0];
+    assign miss = is_branch_d && pc_src_d != last_taken;
+
+    branch_predict_buffer BPB(
+        .clk,
+        .rst,
+        .en(~stall_f),
+        .pc_f(pc_f),
+        .instr_f(instr_f),
+        .is_branch(is_branch_d),
+        .miss(miss),
+        .pc_branch_d(pc_branch_d),
+        .last_taken(last_taken),
+        .predict_pc(predict_pc)
+    );
 
     fetch_reg fetchReg(
         .clk,
@@ -50,6 +71,8 @@ module mips (
         .reg_src_a_d(reg_src_a_d),
         .pc_src_d(pc_src_d),
         .jump(jump),
+        .predict_miss(miss),
+        .predict_pc(predict_pc),
         .pc_next_f(pc_next_f),
         .pc_plus_4_f(pc_plus_4_f)
     );
@@ -194,6 +217,7 @@ module mips (
         .reg_we_m(reg_we_m),
         .reg_write_addr_w(reg_write_addr_w),
         .reg_we_w(reg_we_w),
+        .predict_miss(miss),
         .stall_f(stall_f),
         .stall_d(stall_d),
         .flush_d(flush_d),
