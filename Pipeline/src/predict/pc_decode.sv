@@ -2,7 +2,7 @@ module pc_decode (
     input   logic   [31:0]pc,
     input   logic   [31:0]instr,
 
-    output  logic   [31:0]pc_puls_4,
+    output  logic   [31:0]pc_plus_4,
     output  logic   [31:0]pc_next,
     output  logic   is_branch,
     output  logic   is_jump

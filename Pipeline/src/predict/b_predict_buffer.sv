@@ -1,5 +1,5 @@
 module branch_predict_buffer #(
-    parameter INDEX_WIDTH = 10;
+    parameter INDEX_WIDTH = 10
 )(
     input   logic   clk,
     input   logic   rst,
@@ -23,14 +23,14 @@ module branch_predict_buffer #(
     logic taken;
 
     assign index = pc_f[INDEX_WIDTH+1:2];
-    assign takem = last_taken ^ miss;
+    assign taken = last_taken ^ miss;
 
     pc_decode pcDecode(
         .pc(pc_f),
         .instr(instr_f),
         .pc_plus_4(pc_plus_4),
         .pc_next(pc_next),
-        .in_branch(is_branch_f),
+        .is_branch(is_branch_f),
         .is_jump(is_jump_f)
     );
 

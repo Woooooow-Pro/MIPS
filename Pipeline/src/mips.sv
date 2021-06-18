@@ -50,7 +50,7 @@ module mips (
         .en(~stall_f),
         .pc_f(pc_f),
         .instr_f(instr_f),
-        .is_branch(is_branch_d),
+        .is_branch_d(is_branch_d),
         .miss(miss),
         .pc_branch_d(pc_branch_d),
         .last_taken(last_taken),

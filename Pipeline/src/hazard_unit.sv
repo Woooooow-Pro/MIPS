@@ -64,7 +64,7 @@ module hazard_unit (
 
     assign stall_d = (branch_stall || lw_stall) === 'X ? 1'b0 : (lw_stall || branch_stall);
     assign flush_e = stall_d || predict_miss;
-    assign flush_d = predict_miss || jump_d;
+    assign flush_d = predict_miss || jump_d[1];
     assign stall_f = stall_d;
 
 endmodule: hazard_unit

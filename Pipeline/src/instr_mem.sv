@@ -8,7 +8,7 @@ module instr_mem #(
     logic [31:0] RAM [Size - 1:0];
 
     initial begin
-        $readmemh("instr.dat", RAM);
+        $readmemh("loop.dat", RAM);
     end
 
     assign instr = RAM[pc_addr];
