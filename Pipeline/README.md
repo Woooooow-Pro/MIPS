@@ -1624,3 +1624,11 @@ exit2:
 ![](img/loop2.png)
 
 这里可以清晰的看到第二张图中, 语句 `beq, $s1, $s0, exit2` 在跳转时分支预测失败, branch history table 中对应位置的 `state` 增加 `1`
+
+## 6. 解决问题
+
+解决了之前实验中 `sra` 逻辑右移失败的问题, 解决方案如下所示:
+
+```verilog
+3'b101:   result_o = $signed(a_i) >>> b_i;  // 5: sra
+```
