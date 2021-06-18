@@ -1321,13 +1321,211 @@ assign stall_f = stall_d;
 assign flush_d = pc_src_d || jump_d;
 ```
 
-## 4 测试
+## 4 动态分支预测
 
-### 4.1 IO 测试
+这里简单实现了个 2 位的 local predictor (其实不是很正规...)
+
+### 4.1 结构
+
+#### 1. Branch Prediction Buffer
+
+Branch Prediction Buffer 也就是这个动态分支预测器的主体, 负责预测跳转地址并与 CPU 交互
+
+实现中, Branch Prediction Buffer 先获得 Fetch 阶段的指令及其地址，通过 [Parser](./src/predict/pc_decode.sv) 进行解析,, 得到一些在 Fetch 阶段就能知道的信息 (如指令类型、跳转目标地址等). 目前能够很好地处理 `j`, `jal`, `beq`, `bne` 指令, 但无法处理 `jr` 指令, 因为需要寄存器的数据. 为方便起见, 还是把 `jr` 指令留给 Decode 阶段, 否则需要处理新增的数据冲突和控制冲突
+
+通过 Fetch 阶段得到的信息, 利用 local predictor (其实就是 branch history table) 进行预测, 并将预测跳转的目的地址返还给 Fetch 阶段. 随后在 Decode 阶段检查预测结果是否正确, 如果不正确, 则将 `miss` 信号置 `1`, 并传给 CPU 和 branch history table. CPU 接收到 `miss` 信号后, Fetch 阶段重新计算正确的地址 (此时正确的 PC 地址在 Decode 阶段, 需要回传给 Fetch 阶段), Hazard Unit 发出控制信号 flush 流水线寄存器 decode_reg 和 execute_reg; branch history table 接收到 `miss` 信号后, 根据实际的 taken 情况进行更新
+
+```verilog
+module branch_predict_buffer #(
+    parameter INDEX_WIDTH = 10
+)(
+    input   logic   clk,
+    input   logic   rst,
+    input   logic   en,
+
+    input   logic   [31:0]pc_f,
+    input   logic   [31:0]instr_f,
+    
+    input   logic   is_branch_d,
+    input   logic   miss,
+    input   logic   [31:0]pc_branch_d,
+
+    output  logic   last_taken,
+    output  logic   [31:0]predict_pc
+);
+    logic [31:0]pc_plus_4, pc_next;
+    logic is_branch_f, is_jump_f;
+
+    logic [INDEX_WIDTH-1:0]index;
+    logic [1:0]state;
+    logic taken;
+
+    assign index = pc_f[INDEX_WIDTH+1:2];
+    assign taken = last_taken ^ miss;
+
+    pc_decode pcDecode(
+        .pc(pc_f),
+        .instr(instr_f),
+        .pc_plus_4(pc_plus_4),
+        .pc_next(pc_next),
+        .is_branch(is_branch_f),
+        .is_jump(is_jump_f)
+    );
+
+    branch_history_table BHT(
+        .clk,
+        .rst,
+        .en,
+        .update_en(is_branch_d),
+        .last_taken(taken),
+        .index(index),
+        .state(state)
+    );
+
+    assign predict_pc = is_jump_f | (is_branch_f & state[1])? pc_next: pc_plus_4;
+
+    always_ff @( posedge clk ) begin
+        if(rst) begin
+            last_taken <= '0;
+        end
+        else if(en) begin
+            last_taken <= state[1];
+        end
+    end
+    
+endmodule: branch_predict_buffer
+```
+
+#### 2. Branch History Table
+
+Branch History Table 是一个局部分支跳转记录, 每个条件跳转指令的跳转记录都分别保存在按地址直接映射的专用位移寄存器内. Local Predictor 利用 BHT 提供的指定分支最近一次跳转记录 `state` 来索引预测结果。
+
+由于映射时使用了地址的低 $t$ 位 `index` 作为索引, 存在重名冲突 (alias) 的可能, 但并不需要做额外处理. 因为毕竟只是 "预测", 小概率发生的重名冲突所导致的预测失败并不会有很大影响
+
+Local Predictor 的优势在于能够发现同一跳转指令在一个时间段内的相关性, 并根据这种相关性作预测; 缺点在于无法发现不同跳转指令间的相关性
+
+- `SIZE_WIDTH`: Branch History Table 地址的位数参数, 对应 BHT 的大小即为 $2^SIZE_WIDTH$ 条记录, 默认 $SIZE_WIDTH = 10$
+- `INDEX_WIDTH`: 地址中用作 Branch History Table 索引的位数 $INDEX_WIDTH$ (忽略最低 2 位的低 $INDEX_WIDTH$ 位), 默认 $INDEX_WIDTH = 10$; 本实现使用了直接映射, 因此 $INDEX_WIDTH = SIZE_WIDTH$, 否则需要使用其他映射方式, 可以是类似于 Cache 的组相联映射, 也可以通过某种 hash 函数来映射 
+
+```verilog
+module branch_history_table #(
+    parameter SIZE_WIDTH = 10,
+    parameter INDEX_WIDTH = 10
+)(
+    input   logic   clk,
+    input   logic   rst,
+    input   logic   en,
+    input   logic   update_en,
+    input   logic   last_taken,
+    input   logic   [INDEX_WIDTH-1:0]index,
+
+    output  logic   [1:0]state
+);
+    localparam SIZE = 2**SIZE_WIDTH;
+
+    logic [1:0]entries[SIZE-1:0];
+    logic [1:0]entry;
+    logic [INDEX_WIDTH-1:0]last_index;
+
+    assign state = entries[index];
+
+    state_switch stateSwitch(
+        .last_taken(last_taken),
+        .pre_state(entries[last_index]),
+        .next_state(entry)
+    );
+
+    always_ff @( posedge clk ) begin
+        if(rst) begin
+            entries <= '{default: '0};
+            last_index <= '0;
+        end
+
+        else if (en) begin
+            if(update_en) begin
+                entries[last_index] <= entry;
+            end
+
+            last_index <= index;
+        end
+    end
+endmodule: branch_history_table
+```
+
+#### 3. `pc_decode`
+
+```verilog
+module pc_decode (
+    input   logic   [31:0]pc,
+    input   logic   [31:0]instr,
+
+    output  logic   [31:0]pc_plus_4,
+    output  logic   [31:0]pc_next,
+    output  logic   is_branch,
+    output  logic   is_jump
+);
+
+    logic [5:0]op, func;
+    logic [31:0]pc_jump, pc_branch;
+    logic [31:0]imm;
+
+    assign op = instr[31:26];
+    assign func = instr[5:0];
+
+    assign pc_plus_4 = pc + 'd4;
+    assign pc_jump = {pc_plus_4[31:28], instr[25:0], 2'b00};
+    assign pc_branch = pc_plus_4 + (imm << 2);
+
+    sign_extension signExtension(
+        .in(instr[15:0]),
+        .out(imm)
+    );
+
+    always_comb begin
+        case(op)
+            6'b000010, 6'b000011: begin     // jal, j
+                pc_next = pc_jump;
+                is_branch = 0;
+                is_jump = 1;
+            end
+            6'b000100, 6'b000101: begin     // beq, bne
+                pc_next = pc_branch;
+                is_branch = 1;
+                is_jump = 0;
+            end
+            default: begin                  // others
+                pc_next = pc_plus_4;
+                is_branch = 0;
+                is_jump = 0;
+            end
+        endcase
+    end
+
+endmodule: pc_decode
+```
+
+### 4.2 改动
+
+本动态分支预测器的实现基于前面实现的 Pipeline, 这里注明所作的一些改动
+
+首先在 mips 里增加了 `branch_predict_buffer` 模块, 并且增加了其与 Fetch 阶段和 Hazard Unit 的交互. Fetch 阶段更改了 `pc_next` (新的 PC 值) 的选择逻辑, 当预测失败或当前指令为 `jr` 时选择原本的 `pc_next` 值, 否则选择 Branch Prediction Buffer 的预测值 `predict_pc`. 这里  Branch Prediction Buffer 同时可以预测非跳转指令的 `pc_next` 值 (也就是 `pc + 4`), 因此这里就一并交给 BPB 处理了, 其中 `jr` 指令是 BPB 无法处理的例外情况
+
+此外, 根据前面的描述， 修改了 `hazard_unit` 的 `flush_d` 信号. 由于现在采用动态分支预测, 跳转指令在 Fetch 阶段后就会直接跳转, 而不像原来要再读取一条无用指令, 因此不需要针对跳转指令进行额外的 flush 操作 (`jr` 指令除外). 实际上这个 penalty 是转移到了预测失败时的情况, 但现在预测成功时就没有这个 penalty 了, 动态分支预测主要就是优化了这个地方
+
+```verilog {.line-numbers}
+assign flush_e = stall_d || predict_miss;
+assign flush_d = predict_miss || jump_d[1];  // wrong prediction or JR
+```
+
+## 5 测试
+
+### 5.1 IO 测试
 
 由于测试代码没变化, 因此就放一张板子图片. 其次是上课给老师检查过但是用的是教室电脑跑的，bitstream 什么的忘记保存了，现在懒得跑了。。。就这样吧~
 
-### 4.2 代码测试
+<img src="img/digital.jpg" style="zoom: 25%;"/>
+
+### 5.2 代码测试
 
 ```verilog
 `timescale 1ns / 1ps
@@ -1355,8 +1553,9 @@ module testbench(
 endmodule
 ```
 
-对应机器代码:
+#### 新增代码测试
 
+对应机器代码:
 
 ```asm
 main:   addi    $t0, $0, 5      ; initialize $t0 = 5            20080005
@@ -1396,3 +1595,32 @@ end:    sw      $t5, 516($0)    ; mem[516] = $2 = -4            ac0d0204
 ![](img/test1.png)
 
 ![](img/test2.png)
+
+#### branch predict 模块测试
+
+对应机器代码:
+
+```asm
+    addi, $s0, $0, 10                                       2010000A
+    addi, $s1, $0, 0                                        20110000
+    addi, $s3, $0, 0                                        20130000
+For1:
+    beq, $s3, $s0, exit     #if counter= s0 then loop ends  12700008
+
+For2:
+    beq, $s1, $s0, exit2    #if counter= s0 then loop ends  12300002
+    addi $s1, $s1, 1        #add 1 to counter               22310001
+    j For2                  #jump back to the top           08000004
+exit2:
+    addi $s1, $0, 0         #resets s1 to 0                 20110000
+    addi $s3, $s3, 1        #add 1 to counter               22730001
+    j For1                  #jump back to for loop          08000003
+```
+
+跑出来的图如下所示:
+
+![](img/loop1.png)
+
+![](img/loop2.png)
+
+这里可以清晰的看到第二张图中, 语句 `beq, $s1, $s0, exit2` 在跳转时分支预测失败, branch history table 中对应位置的 `state` 增加 `1`
